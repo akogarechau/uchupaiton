@@ -31,12 +31,13 @@ while n > 0:
         counter2 += 1
     if digit > 5:
         S5 += digit
-    if digit > 7:
+    if digit >= 7:
         S7 *= digit
     if digit == 5 or digit == 0:
         counter50 += 1
     n //= 10
 print(counter3, counterfd, counter2, S5, S7, counter50, sep = '\n')
+
 
 
 
