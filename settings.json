@@ -1,0 +1,16 @@
+{
+    "editor.fontSize": 22,
+    "workbench.activityBar.location": "hidden",
+    "workbench.sideBar.location": "right",
+    "editor.fontFamily": "JetBrains Mono",
+    "workbench.settings.applyToAllProfiles": [
+        "editor.fontFamily"
+    ],
+    "editor.fontLigatures": false
+    
+    "workbench.editor.showTabs": "single"
+    "workbench.editor.showIcons": false
+    "workbench.editor.labelFormat": "medium"
+    "breadcrumbs.enabled": false
+}
+
