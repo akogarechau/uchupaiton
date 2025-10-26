@@ -32,7 +32,7 @@ def encrypt(str: str, shift: int):
         if char.isalpha(): # проверяем буква ли это
             
             # проверка на регистр буквы
-            case_flag = 0
+            case_flag = 0 # значение - множитель в форуле шифра, нужен для возврата изначального регистра букве
             if char.isupper() == 1:
                 case_flag = 1
                 
