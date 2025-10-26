@@ -9,7 +9,6 @@ ex2.py
 """
 
 from random import randint
-from heapq import nlargest
 
 # генерируем список студентов, иммитируя полученный с сайта список
 student_scores = []
