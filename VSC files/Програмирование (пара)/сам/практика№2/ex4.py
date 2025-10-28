@@ -33,6 +33,9 @@ class SpaceShip:
         self._storage = []
         self.succesful_mission = successful_mission
         self.members: list[CrewMember] = list()
+        
+        if self.hull_status > 100:
+            self.hull_status == 100
     
     def speed_change(self, number: int):
         
@@ -61,14 +64,26 @@ class SpaceShip:
             print('GAME OVER GAME OVER GAME OVER GAME OVER GAME OVER GAME OVER')
             
     def hull_repair (self, amount) -> None:
-        
+        flag = 0
+        print(
+                f'Попытка ремонта на {amount}%'
+        )
         for member in self.members:
             
             if member.role == 'Инженер':
                 self.hull_status += amount
+                flag = 1
                 
                 if self.hull_status > 100:
                     self.hull_status = 100
+                    
+                print(
+                    f'Успешно произведена починка корабля до {self.hull_status}%\n'
+                )
+            if flag == 0:
+                print(
+                f'Починка корабля не удалась!\n'
+            )
                     
     def add_resourse(self, resourses: str, amount: int =1) -> None:
         
@@ -133,12 +148,16 @@ class Mission:
             
             current_event = choice(self.events)
             print(
+                f'{self.name} - текущее задание\n'
                 f'"{current_event[0]}" - событие предстоящее команде\n'
                 f'{current_event[1]}% - прогнозируемый урон\n'            
             )
             if space_ship.hull_status > current_event[1] and space_ship.role_check(self.needed_role):
                 
-                print(f'"{current_event[0]}" - успешно преодолен\n')
+                print(
+                    f'"{current_event[0]}" - успешно преодолен\n'
+                    f'Задание успешно выполнено'
+                )
                 space_ship.hull_damage(current_event[1])
                 space_ship.add_resourse(choice(self.resourses), 2)
                 
@@ -150,7 +169,7 @@ class Mission:
 
 Engineer = CrewMember('Делл Конагер', 47, 'Инженер', True, ['Чинить корабль', '"Ему нравится мастерить вещи"'], 100)
 Captain = CrewMember('Камина Дзиха', 42, 'Капитан', True, ['Командовать', '"Его невозможно остановить"'], 100)
-space_ship1 = SpaceShip('ПОБЕДИТЕЛЕЙ', 350)
+space_ship1 = SpaceShip('"ПОБЕДИТЕЛЕЙ"', 350)
 space_ship1.add_member(Engineer)
 space_ship1.add_member(Captain)
 print(space_ship1.info())
