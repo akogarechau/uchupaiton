@@ -84,6 +84,7 @@ customer.add_order(order)
 cart2 = Shopping_cart()
 cart2.add_product(milk, 1)
 cart2.add_product(cherry_juice, 3)
+
 order2 = Order(cart2, 20, 0)
 customer.add_order(order2)
 print('Заказ -', cart2.cart_info)
