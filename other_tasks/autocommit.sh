@@ -21,8 +21,15 @@ if not task_file.exists():
     raise FileNotFoundError(f"Task file not found: {task_file}")
 
 text = task_file.read_text(encoding='utf-8')
-tasks = re.split(r'#\\s*Задача\\s*\\d+', text)
+
+# Универсальный парсер задач
+pattern = r'(?:#\s*Задача\s*\d*[\s\S]*?)(?=(?:#\s*Задача\s*\d+)|\Z)'
+tasks = re.findall(pattern, text, re.MULTILINE)
 tasks = [t.strip() for t in tasks if t.strip()]
+
+if not tasks:
+    raise ValueError("No tasks found in file")
+
 chosen = random.choice(tasks)
 
 path = pathlib.Path("$PY_FILE")
@@ -30,6 +37,7 @@ with open(path, "w", encoding="utf-8") as f:
     f.write(f'"""\n{chosen}\n"""\n\n')
     f.write("# --- Solution code below ---\n")
     f.write("print('Solution executed successfully.')\\n")
+
 print(f"Created: {path}")
 EOF
 
@@ -41,7 +49,5 @@ git add "$PY_FILE"
 git commit -m "Solved problem $(date +"%Y-%m-%d %H:%M")"
 git push
 
-
-git add "$PY_FILE"
-git commit -m "Solved problem $(date +"%Y-%m-%d %H:%M")"
-git push
+# ==== Очистка состояния ====
+git restore . || true
