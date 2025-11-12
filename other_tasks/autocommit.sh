@@ -22,21 +22,27 @@ if not task_file.exists():
 
 text = task_file.read_text(encoding='utf-8')
 
-# Универсальный парсер задач
-pattern = r'(?:#\s*Задача)'
-tasks = re.findall(pattern, text, re.MULTILINE)
-tasks = [t.strip() for t in tasks if t.strip()]
+# Ищем задачи по шаблону: # номер. описание
+pattern = r'#\s*\d+\..*?(?=#\s*\d+\.|\Z)'
+tasks = re.findall(pattern, text, re.DOTALL)
 
 if not tasks:
     raise ValueError("No tasks found in file")
 
-chosen = random.choice(tasks)
+chosen = random.choice(tasks).strip()
 
 path = pathlib.Path("$PY_FILE")
 with open(path, "w", encoding="utf-8") as f:
     f.write(f'"""\n{chosen}\n"""\n\n')
     f.write("# --- Solution code below ---\n")
-    f.write("print('Solution executed successfully.')\\n")
+    # Добавляем импорты если они есть в исходном файле
+    if "import random" in text:
+        f.write("import random\\n")
+    if "import string" in text:
+        f.write("import string\\n")
+    f.write("\\n")
+    f.write("# Your solution implementation here\\n")
+    f.write("print('Task file created successfully.')\\n")
 
 print(f"Created: {path}")
 EOF
@@ -46,7 +52,7 @@ git config user.name "github-actions[bot]"
 git config user.email "github-actions[bot]@users.noreply.github.com"
 
 git add "$PY_FILE"
-git commit -m "Solved problem $(date +"%Y-%m-%d %H:%M")"
+git commit -m "Auto-commit: random task $(date +"%Y-%m-%d %H:%M")"
 git push
 
 # ==== Очистка состояния ====
