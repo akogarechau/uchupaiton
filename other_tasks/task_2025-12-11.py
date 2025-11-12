@@ -1,8 +1,7 @@
-# 7. Проверка на палиндром
-def is_palindrome(s):
-    s = ''.join(c for c in s.lower() if c.isalnum())
-    return s == s[::-1]
+# 9. Сумма цифр числа
+def digit_sum(n):
+    return sum(int(d) for d in str(n) if d.isdigit())
 
-print("'А роза упала на лапу Азора' - палиндром?", is_palindrome("А роза упала на лапу Азора"))
+print("Сумма цифр 2024:", digit_sum(2024))
 
 # Задача
