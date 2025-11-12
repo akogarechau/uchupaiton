@@ -44,7 +44,7 @@ git config user.name "github-actions[bot]"
 git config user.email "github-actions[bot]@users.noreply.github.com"
 
 git add "$PY_FILE"
-git commit -m "Sloved previous problem: Task done $(date +"%Y-%d-%m || %H:%M")"
+git commit -m "Sloved previous problem: Task done $(date +"%Y-%d-%m || %H:%M UTC")"
 git push
 
 # ==== Очистка состояния ====
