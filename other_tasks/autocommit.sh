@@ -23,7 +23,7 @@ if not task_file.exists():
 text = task_file.read_text(encoding='utf-8')
 
 # Универсальный парсер задач
-pattern = r'(?:#\s*Задача\s*\d*[\s\S]*?)(?=(?:#\s*Задача\s*\d+)|\Z)'
+pattern = r'(?:#\s*Задача)'
 tasks = re.findall(pattern, text, re.MULTILINE)
 tasks = [t.strip() for t in tasks if t.strip()]
 
