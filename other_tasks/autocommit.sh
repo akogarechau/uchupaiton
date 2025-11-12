@@ -9,7 +9,7 @@ PY_DIR="$REPO_DIR"
 cd "$REPO_DIR" || exit
 
 # ==== Время ====
-NOW=$(date +"%Y-%m-%d_%H-%M-%S")
+NOW=$(date +"%Y-%d-%m")
 PY_FILE="${PY_DIR}/task_${NOW}.py"
 
 # ==== Извлечение случайной задачи ====
