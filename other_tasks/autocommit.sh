@@ -33,16 +33,8 @@ chosen = random.choice(tasks).strip()
 
 path = pathlib.Path("$PY_FILE")
 with open(path, "w", encoding="utf-8") as f:
-    f.write(f'"""\n{chosen}\n"""\n\n')
-    f.write("# --- Solution code below ---\n")
-    # Добавляем импорты если они есть в исходном файле
-    if "import random" in text:
-        f.write("import random\\n")
-    if "import string" in text:
-        f.write("import string\\n")
-    f.write("\\n")
-    f.write("# Your solution implementation here\\n")
-    f.write("print('Task file created successfully.')\\n")
+    f.write(f'{chosen}\n')
+
 
 print(f"Created: {path}")
 EOF
