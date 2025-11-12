@@ -1,40 +1,46 @@
 #!/bin/bash
+set -e
 
 # ==== Настройки ====
-REPO_DIR="$(pwd)/other_tasks"           # Папка с репозиторием
-TASK_FILE="$REPO_DIR/d20251112_298c62.py" # Файл с 15 задачами
-PY_DIR="$REPO_DIR"                     # Куда сохраняем Python-файлы
-GIT_USER="your_github_username"
-GIT_EMAIL="your_email@example.com"
+REPO_DIR="$(pwd)/other_tasks"
+TASK_FILE="$REPO_DIR/d20251112_298c62.py"
+PY_DIR="$REPO_DIR"
 
-# ==== Переход в папку репозитория ====
 cd "$REPO_DIR" || exit
 
 # ==== Время ====
 NOW=$(date +"%Y-%m-%d_%H-%M-%S")
-
-# ==== Создание нового файла ====
 PY_FILE="${PY_DIR}/task_${NOW}.py"
 
 # ==== Извлечение случайной задачи ====
-python3 - <<'EOF'
+python3 - <<EOF
 import random, re, pathlib
 
-path = pathlib.Path("$TASK_FILE")
-text = path.read_text(encoding='utf-8')
-tasks = re.split(r'#\s*Задача\s*\d+', text)
+task_file = pathlib.Path("$TASK_FILE")
+if not task_file.exists():
+    raise FileNotFoundError(f"Task file not found: {task_file}")
+
+text = task_file.read_text(encoding='utf-8')
+tasks = re.split(r'#\\s*Задача\\s*\\d+', text)
 tasks = [t.strip() for t in tasks if t.strip()]
 chosen = random.choice(tasks)
 
-with open("$PY_FILE", "w", encoding="utf-8") as f:
+path = pathlib.Path("$PY_FILE")
+with open(path, "w", encoding="utf-8") as f:
     f.write(f'"""\n{chosen}\n"""\n\n')
     f.write("# --- Solution code below ---\n")
-    f.write("print('Solution executed successfully.')\n")
+    f.write("print('Solution executed successfully.')\\n")
+print(f"Created: {path}")
 EOF
 
 # ==== Git-коммит ====
-git config user.name "$GIT_USER"
-git config user.email "$GIT_EMAIL"
+git config user.name "github-actions[bot]"
+git config user.email "github-actions[bot]@users.noreply.github.com"
+
+git add "$PY_FILE"
+git commit -m "Solved problem $(date +"%Y-%m-%d %H:%M")"
+git push
+
 
 git add "$PY_FILE"
 git commit -m "Solved problem $(date +"%Y-%m-%d %H:%M")"
