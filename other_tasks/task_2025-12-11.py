@@ -1,7 +1,8 @@
-# 4. Обратный порядок элементов в списке
-def reverse_list(lst):
-    return lst[::-1]
+# 7. Проверка на палиндром
+def is_palindrome(s):
+    s = ''.join(c for c in s.lower() if c.isalnum())
+    return s == s[::-1]
 
-print("Обратный список:", reverse_list([1, 2, 3, 4]))
+print("'А роза упала на лапу Азора' - палиндром?", is_palindrome("А роза упала на лапу Азора"))
 
 # Задача
