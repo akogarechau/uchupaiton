@@ -1,4 +1,4 @@
-name: Auto Commit Tasks
+name: Problem Solver
 
 on:
   schedule:
