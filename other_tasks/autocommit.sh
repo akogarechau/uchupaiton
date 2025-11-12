@@ -44,7 +44,7 @@ git config user.name "github-actions[bot]"
 git config user.email "github-actions[bot]@users.noreply.github.com"
 
 git add "$PY_FILE"
-git commit -m "Auto-commit: random task $(date +"%Y-%m-%d %H:%M")"
+git commit -m "Auto-commit: Task done $(date +"%Y-%m-%d %H:%M")"
 git push
 
 # ==== Очистка состояния ====
