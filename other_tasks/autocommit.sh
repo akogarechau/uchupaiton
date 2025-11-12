@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ==== Настройки ====
-REPO_DIR="$HOME/other_tasks"           # Папка с репозиторием
+REPO_DIR="$(pwd)/other_tasks"           # Папка с репозиторием
 TASK_FILE="$REPO_DIR/d20251112_298c62.py" # Файл с 15 задачами
 PY_DIR="$REPO_DIR"                     # Куда сохраняем Python-файлы
 GIT_USER="your_github_username"
