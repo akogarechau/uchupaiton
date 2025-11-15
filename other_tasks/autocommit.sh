@@ -40,7 +40,8 @@ print(f"Created: {path}")
 EOF
 
 # ==== Git-коммит ====
-git config --global akogarechau.akorevial@gmail.com
+git config --global user.name akogarechau
+git config --global user.email akorevial@gmail.com
 
 git add "$PY_FILE"
 git commit -m "Sloved problem: Task done $(date +"%Y-%d-%m || %H:%M UTC")"
