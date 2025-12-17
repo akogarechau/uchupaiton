@@ -31,6 +31,13 @@ class PlayerShip(BaseSprite):
         super().__init__(120, 100, "ship.png", screen_w, screen_h)
         self.rect.centerx = screen_w // 2
         self.rect.bottom = screen_h - 60
+        
+        # ✅ ХИТБОКС КОРАБЛЯ: по корпусу (без крыльев и пламени)
+        hb_w = int(self.rect.width * 0.55)   # примерно по фюзеляжу
+        hb_h = int(self.rect.height * 0.7)   # не берём хвостовой огонь
+        self.hitbox = pygame.Rect(0, 0, hb_w, hb_h)
+        self.hitbox.center = self.rect.center
+
         self.speed = 400
         self.bullet_speed = 300
         self.last_shot = 0
@@ -47,6 +54,8 @@ class PlayerShip(BaseSprite):
     def reset(self):
         self.rect.centerx = self.screen_w // 2
         self.rect.bottom = self.screen_h - 60
+        self.hitbox.center = self.rect.center  # ✅ Синхронизация хитбокса
+        
         self.speed = 400
         self.bullet_speed = 300
         self.shot_delay = 0.3
@@ -68,6 +77,9 @@ class PlayerShip(BaseSprite):
         
         self.rect.x = max(0, min(self.rect.x + move_x, self.screen_w - self.rect.width))
         self.rect.y = max(100, min(self.rect.y + move_y, self.screen_h - self.rect.height))
+        
+        # ✅ Синхронизируем хитбокс с картинкой
+        self.hitbox.center = self.rect.center
         
         if (pressed_keys[self.keys['shoot']] and 
             time.time() - self.last_shot > self.shot_delay):
@@ -106,7 +118,7 @@ class Enemy(pygame.sprite.Sprite):
         self.is_bonus = is_bonus
         self.screen_w = screen_w
         self.screen_h = screen_h
-        self.size = size
+        self.base_size = size
         
         full_path = IMAGES_DIR / image_path
         try:
@@ -116,24 +128,32 @@ class Enemy(pygame.sprite.Sprite):
             color = (255, 100, 100) if is_bonus else (150, 150, 150)
             original_image.fill(color)
         
-        # НОВОЕ: СЛУЧАЙНЫЙ ПОВОРОТ астероида (от -45° до +45°)
-        self.rotation = random.uniform(-math.pi/4, math.pi/4)  # -45° до +45° в радианах
-        self.image = pygame.transform.rotate(
-            pygame.transform.scale(original_image, size), 
-            math.degrees(self.rotation)
-        )
+        # Масштабируем исходный спрайт
+        scaled = pygame.transform.scale(original_image, size)
         
-        # УМЕНЬШЕННЫЙ ХИТБОКС (на 20% меньше визуального размера)
-        hitbox_size = (int(size[0] * 0.8), int(size[1] * 0.8))
-        self.rect = self.rect = pygame.Rect(0, 0, *hitbox_size)
-        self.rect.center = self.image.get_rect().center  # Центрируем хитбокс
+        # ✅ СЛУЧАЙНЫЙ ПОВОРОТ
+        angle = random.uniform(-45, 45)
+        self.image = pygame.transform.rotate(scaled, angle)
         
-        self.reset_position()
+        # ✅ ХИТБОКС: почти круг по центру, 75% от диаметра
+        img_rect = self.image.get_rect()
+        hb_side = int(min(img_rect.width, img_rect.height) * 0.75)
+        self.rect = pygame.Rect(0, 0, hb_side, hb_side)
+        self.rect.center = img_rect.center
+        
         self.speed = random.randint(*speed_range) if isinstance(speed_range, tuple) else speed_range
+        self.reset_position()
 
     def reset_position(self):
+        # ✅ 10 каналов, используем 0..8 (90% ширины экрана)
         channel_size = self.screen_w // 10
-        self.rect.x = random.randint(0, 9) * channel_size + (channel_size // 4)
+        channel = random.randint(0, 8)
+        self.rect.x = channel * channel_size + (channel_size // 4)
+        
+        # ✅ Не выходим за край экрана
+        if self.rect.right > self.screen_w - 5:
+            dx = self.rect.right - (self.screen_w - 5)
+            self.rect.x -= dx
         self.rect.bottom = -50
 
     def update(self, dt):
@@ -189,6 +209,20 @@ def main():
                     bullets.empty()
                 elif event.key == pygame.K_ESCAPE:
                     running = False
+            
+            # ✅ Обработка экрана победы
+            if game_state == "victory" and event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    game_state = "playing"
+                    enemies_destroyed = 0
+                    player.reset()
+                    for enemy in enemies:
+                        enemy.reset_position()
+                    for bonus in bonuses:
+                        bonus.reset_position()
+                    bullets.empty()
+                elif event.key == pygame.K_ESCAPE:
+                    running = False
         
         if game_state == "playing":
             new_bullet = player.update(dt, pressed_keys)
@@ -199,6 +233,7 @@ def main():
             bonuses.update(dt)
             bullets.update(dt)
             
+            # ✅ Пули против астероидов (их rect)
             for bullet in bullets.copy():
                 hits = pygame.sprite.spritecollide(bullet, enemies, True)
                 if hits:
@@ -208,24 +243,21 @@ def main():
                     new_enemy = Enemy((80, 80), "asteroid.png", (80, 150), SCREEN_WIDTH, SCREEN_HEIGHT)
                     enemies.add(new_enemy)
             
-            if pygame.sprite.spritecollide(player, enemies, False):
+            # ✅ СТОЛКНОВЕНИЕ ИГРОКА: hitbox vs enemy.rect
+            if any(enemy.rect.colliderect(player.hitbox) for enemy in enemies):
                 game_state = "game_over"
             
-            bonus_hits = pygame.sprite.spritecollide(player, bonuses, True)
-            if bonus_hits:
+            # ✅ Бонусы тоже по хитбоксу игрока
+            bonus_hits = [b for b in bonuses if b.rect.colliderect(player.hitbox)]
+            for bonus in bonus_hits:
+                bonuses.remove(bonus)
                 player.apply_powerup()
                 new_bonus = Enemy((60, 60), "bonus.png", 100, SCREEN_WIDTH, SCREEN_HEIGHT, True)
                 bonuses.add(new_bonus)
             
-            if enemies_destroyed >= total_enemies:
-                game_state = "playing"
-                enemies_destroyed = 0
-                player.reset()
-                for enemy in enemies:
-                    enemy.reset_position()
-                for bonus in bonuses:
-                    bonus.reset_position()
-                bullets.empty()
+            # ✅ ПРОВЕРКА ПОБЕДЫ
+            if player.killed_enemies >= total_enemies:
+                game_state = "victory"
         
         # Отрисовка
         screen.fill(BG_COLOR)
@@ -246,7 +278,23 @@ def main():
             bullets.draw(screen)
             screen.blit(player.image, player.rect)
         
-        # Надписи на переднем плане
+        elif game_state == "victory":
+            overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+            overlay.set_alpha(120)
+            overlay.fill((20, 100, 20))
+            screen.blit(overlay, (0, 0))
+            
+            for _ in range(20):
+                x = random.randint(0, SCREEN_WIDTH)
+                y = random.randint(0, SCREEN_HEIGHT)
+                pygame.draw.circle(screen, (255, 255, 255), (x, y), 2)
+            
+            enemies.draw(screen)
+            bonuses.draw(screen)
+            bullets.draw(screen)
+            screen.blit(player.image, player.rect)
+        
+        # Надписи
         score_text = font.render(f"Астероидов: {player.killed_enemies}", True, (255, 255, 255))
         score_rect = score_text.get_rect(topleft=(20, 20))
         screen.blit(score_text, score_rect)
@@ -265,6 +313,19 @@ def main():
             screen.blit(final_score_text, final_score_rect)
             
             restart_text = small_font.render("SPACE - Рестарт, ESC - Выход", True, (255, 255, 255))
+            restart_rect = restart_text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2 + 60))
+            screen.blit(restart_text, restart_rect)
+        
+        elif game_state == "victory":
+            victory_text = font.render("ПОБЕДА!", True, (0, 255, 0))
+            victory_rect = victory_text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2 - 80))
+            screen.blit(victory_text, victory_rect)
+            
+            final_score_text = font.render(f"Уничтожено: {player.killed_enemies}/{total_enemies}", True, (255, 255, 100))
+            final_score_rect = final_score_text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2 - 20))
+            screen.blit(final_score_text, final_score_rect)
+            
+            restart_text = small_font.render("SPACE - Новая игра, ESC - Выход", True, (255, 255, 255))
             restart_rect = restart_text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2 + 60))
             screen.blit(restart_text, restart_rect)
         
